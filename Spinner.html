@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spinner Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            color: #fff;
+        }
+
+        .game-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            margin: 20px 0;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            min-width: 400px;
+        }
+
+        .spinner-container {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            margin: 0 auto 30px;
+        }
+
+        .spinner {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
+        }
+
+        .spinner-segment {
+            position: absolute;
+            width: 50%;
+            height: 50%;
+            transform-origin: 100% 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .spinner-segment:nth-child(1) { background: #ff6b6b; transform: rotate(0deg); }
+        .spinner-segment:nth-child(2) { background: #4ecdc4; transform: rotate(36deg); }
+        .spinner-segment:nth-child(3) { background: #45b7d1; transform: rotate(72deg); }
+        .spinner-segment:nth-child(4) { background: #96ceb4; transform: rotate(108deg); }
+        .spinner-segment:nth-child(5) { background: #feca57; transform: rotate(144deg); }
+        .spinner-segment:nth-child(6) { background: #ff9ff3; transform: rotate(180deg); }
+        .spinner-segment:nth-child(7) { background: #54a0ff; transform: rotate(216deg); }
+        .spinner-segment:nth-child(8) { background: #5f27cd; transform: rotate(252deg); }
+        .spinner-segment:nth-child(9) { background: #00d2d3; transform: rotate(288deg); }
+        .spinner-segment:nth-child(10) { background: #ff6348; transform: rotate(324deg); }
+
+        .spinner-pointer {
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-top: 30px solid #ff4757;
+            z-index: 10;
+            filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.3));
+        }
+
+        .spinner-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 40px;
+            height: 40px;
+            background: #fff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #333;
+            z-index: 5;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .controls {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .bet-controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .number-selector {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .number-btn {
+            width: 40px;
+            height: 40px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .number-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.1);
+        }
+
+        .number-btn.selected {
+            background: #ff4757;
+            border-color: #ff4757;
+            transform: scale(1.1);
+        }
+
+        input, button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        input {
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            width: 120px;
+        }
+
+        input:focus {
+            outline: none;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+
+        button {
+            background: linear-gradient(135deg, #ff4757, #ff3742);
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+            border: none;
+            min-width: 120px;
+        }
+
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 71, 87, 0.4);
+        }
+
+        button:disabled {
+            background: #666;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .start-btn {
+            background: linear-gradient(135deg, #2ed573, #1dd1a1);
+            font-size: 18px;
+            padding: 15px 30px;
+            margin: 20px 10px;
+        }
+
+        .start-btn:hover:not(:disabled) {
+            box-shadow: 0 5px 15px rgba(46, 213, 115, 0.4);
+        }
+
+        .status {
+            text-align: center;
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(5px);
+        }
+
+        .result {
+            text-align: center;
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .result.win {
+            background: linear-gradient(135deg, #2ed573, #1dd1a1);
+            color: white;
+        }
+
+        .result.lose {
+            background: linear-gradient(135deg, #ff4757, #ff3742);
+            color: white;
+        }
+
+        .result.pending {
+            background: linear-gradient(135deg, #feca57, #ff9ff3);
+            color: white;
+        }
+
+        .history {
+            margin-top: 20px;
+        }
+
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            margin: 5px 0;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .wallet-info {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            backdrop-filter: blur(5px);
+        }
+
+        .spinning {
+            animation: spin 3s ease-out;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(1440deg); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        @media (max-width: 480px) {
+            .game-container {
+                min-width: auto;
+                width: 100%;
+                padding: 20px;
+            }
+            
+            .spinner-container {
+                width: 250px;
+                height: 250px;
+            }
+            
+            .bet-controls {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1 style="text-align: center; margin-bottom: 20px; font-size: 2.5em; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">🎯 Spinner Game 🎯</h1>
+    
+    <div class="game-container">
+        <div class="wallet-info">
+            <h3>💰 Wallet Balance: ₹<span id="walletBalance">1000</span></h3>
+        </div>
+
+        <div class="spinner-container">
+            <div class="spinner-pointer"></div>
+            <div class="spinner" id="spinner">
+                <div class="spinner-segment">0</div>
+                <div class="spinner-segment">1</div>
+                <div class="spinner-segment">2</div>
+                <div class="spinner-segment">3</div>
+                <div class="spinner-segment">4</div>
+                <div class="spinner-segment">5</div>
+                <div class="spinner-segment">6</div>
+                <div class="spinner-segment">7</div>
+                <div class="spinner-segment">8</div>
+                <div class="spinner-segment">9</div>
+            </div>
+            <div class="spinner-center" id="centerDisplay">?</div>
+        </div>
+
+        <div class="number-selector">
+            <div style="width: 100%; text-align: center; margin-bottom: 10px; font-weight: bold;">Select Your Number (0-9):</div>
+            <button class="number-btn" onclick="selectNumber(0)">0</button>
+            <button class="number-btn" onclick="selectNumber(1)">1</button>
+            <button class="number-btn" onclick="selectNumber(2)">2</button>
+            <button class="number-btn" onclick="selectNumber(3)">3</button>
+            <button class="number-btn" onclick="selectNumber(4)">4</button>
+            <button class="number-btn" onclick="selectNumber(5)">5</button>
+            <button class="number-btn" onclick="selectNumber(6)">6</button>
+            <button class="number-btn" onclick="selectNumber(7)">7</button>
+            <button class="number-btn" onclick="selectNumber(8)">8</button>
+            <button class="number-btn" onclick="selectNumber(9)">9</button>
+        </div>
+
+        <div class="bet-controls">
+            <label for="betAmount" style="font-weight: bold;">Bet Amount:</label>
+            <input type="number" id="betAmount" placeholder="Enter amount" min="1" value="10">
+            <button onclick="placeBet()">Place Bet</button>
+        </div>
+
+        <div class="controls">
+            <button class="start-btn" id="spinBtn" onclick="startSpin()" disabled>
+                Start Spin 🎰
+            </button>
+            <button onclick="checkResult()" style="background: linear-gradient(135deg, #3742fa, #2f3542);">
+                Check Result 📊
+            </button>
+        </div>
+
+        <div class="status" id="gameStatus">
+            Select a number and place your bet to start!
+        </div>
+
+        <div class="result" id="gameResult" style="display: none;"></div>
+    </div>
+
+    <div class="game-container">
+        <h3 style="text-align: center; margin-bottom: 15px;">📈 Recent Results</h3>
+        <div class="history" id="gameHistory">
+            <div class="history-item">
+                <span>No previous games</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Game state
+        let gameState = {
+            selectedNumber: null,
+            betAmount: 0,
+            currentBetId: null,
+            isSpinning: false,
+            walletBalance: 1000,
+            gameHistory: [],
+            serverResult: null
+        };
+
+        // Select number function
+        function selectNumber(number) {
+            if (gameState.isSpinning) return;
+            
+            // Remove previous selection
+            document.querySelectorAll('.number-btn').forEach(btn => btn.classList.remove('selected'));
+            
+            // Add selection to clicked button
+            event.target.classList.add('selected');
+            gameState.selectedNumber = number;
+            
+            updateGameStatus();
+        }
+
+        // Update game status display
+        function updateGameStatus() {
+            const statusElement = document.getElementById('gameStatus');
+            if (gameState.selectedNumber === null) {
+                statusElement.textContent = 'Select a number and place your bet to start!';
+            } else {
+                statusElement.textContent = `Selected Number: ${gameState.selectedNumber}`;
+            }
+        }
+
+        // Place bet function
+        async function placeBet() {
+            const betAmount = parseInt(document.getElementById('betAmount').value);
+            
+            if (isNaN(betAmount) || betAmount <= 0) {
+                alert('Please enter a valid bet amount');
+                return;
+            }
+
+            if (gameState.selectedNumber === null) {
+                alert('Please select a number first');
+                return;
+            }
+
+            if (betAmount > gameState.walletBalance) {
+                alert('Insufficient wallet balance');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/spinner/user/place-bet', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    },
+                    body: JSON.stringify({
+                        selectedNumber: gameState.selectedNumber,
+                        betAmount: betAmount
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    gameState.currentBetId = data.userBet._id;
+                    gameState.walletBalance = data.walletBalance;
+                    document.getElementById('walletBalance').textContent = gameState.walletBalance;
+                    document.getElementById('spinBtn').disabled = false;
+                    alert('Bet placed successfully!');
+                } else {
+                    alert(data.message || 'Failed to place bet');
+                }
+            } catch (error) {
+                console.error('Error placing bet:', error);
+                alert('Failed to place bet. Please try again.');
+            }
+        }
+
+        // Start spin function
+        function startSpin() {
+            if (gameState.isSpinning) return;
+            
+            gameState.isSpinning = true;
+            const spinner = document.getElementById('spinner');
+            spinner.classList.add('spinning');
+            
+            document.getElementById('spinBtn').disabled = true;
+            document.getElementById('centerDisplay').textContent = '?';
+
+            // Spin animation duration matches CSS animation (3s)
+            setTimeout(() => {
+                spinner.classList.remove('spinning');
+                gameState.isSpinning = false;
+                checkResult();
+            }, 3000);
+        }
+
+        // Check result function
+        async function checkResult() {
+            if (!gameState.currentBetId) {
+                alert('No active bet to check');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/spinner/user/check-result/${gameState.currentBetId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    const resultElement = document.getElementById('gameResult');
+                    resultElement.style.display = 'block';
+                    
+                    if (data.bet.status === 'won') {
+                        resultElement.className = 'result win';
+                        resultElement.textContent = `🎉 ${data.message}`;
+                    } else if (data.bet.status === 'lost') {
+                        resultElement.className = 'result lose';
+                        resultElement.textContent = `😢 ${data.message}`;
+                    } else {
+                        resultElement.className = 'result pending';
+                        resultElement.textContent = data.message;
+                    }
+
+                    // Update center display with result number if available
+                    if (data.bet.resultNumber !== undefined) {
+                        document.getElementById('centerDisplay').textContent = data.bet.resultNumber;
+                    }
+
+                    // Update game history
+                    updateGameHistory(data.bet);
+                }
+            } catch (error) {
+                console.error('Error checking result:', error);
+                alert('Failed to check result. Please try again.');
+            }
+        }
+
+        // Update game history
+        function updateGameHistory(bet) {
+            gameState.gameHistory.unshift(bet);
+            if (gameState.gameHistory.length > 5) {
+                gameState.gameHistory.pop();
+            }
+
+            const historyElement = document.getElementById('gameHistory');
+            historyElement.innerHTML = gameState.gameHistory.map(bet => `
+                <div class="history-item">
+                    <span>Number: ${bet.selectedNumber}</span>
+                    <span>Result: ${bet.resultNumber || '?'}</span>
+                    <span>Amount: ₹${bet.betAmount}</span>
+                    <span style="color: ${bet.status === 'won' ? '#2ed573' : '#ff4757'}">
+                        ${bet.status.toUpperCase()}
+                    </span>
+                </div>
+            `).join('');
+        }
+
+        // Initialize game
+        function initGame() {
+            document.getElementById('walletBalance').textContent = gameState.walletBalance;
+            updateGameStatus();
+        }
+
+        // Start the game when page loads
+        initGame();
+    </script>
+</body>
+</html>

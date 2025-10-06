@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Manual Deposit</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 500px;
+      margin: 40px auto;
+      padding: 20px;
+      border: 1px solid #ccc;
+      border-radius: 12px;
+      background-color: #f9f9f9;
+    }
+
+    h2 {
+      text-align: center;
+      color: #dc2626;
+    }
+
+    label {
+      display: block;
+      margin-top: 15px;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      box-sizing: border-box;
+    }
+
+    button {
+      margin-top: 20px;
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(135deg, #dc2626, #ef4444);
+      border: none;
+      color: white;
+      font-size: 16px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .message {
+      margin-top: 20px;
+      text-align: center;
+    }
+
+    .success {
+      color: green;
+    }
+
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Manual Deposit</h2>
+
+  <form id="depositForm">
+    <label for="amount">Amount</label>
+    <input type="number" id="amount" name="amount" required>
+
+    <label for="utrId">UTR / Transaction ID</label>
+    <input type="text" id="utrId" name="utrId" required>
+
+    <label for="paymentMethod">Payment Method</label>
+    <select id="paymentMethod" name="paymentMethod" required>
+        <option value="">Select</option>
+        <option value="upi">UPI</option>
+        <option value="paytm">Paytm</option>
+        <option value="googlepay">Google Pay</option>
+        <option value="bank_transfer">Bank Transfer</option>
+        <option value="wallet">Wallet</option>
+        <option value="razorpay">Razorpay</option>
+      </select>
+      
+
+
+    <label for="remarks">Remarks</label>
+    <textarea id="remarks" name="remarks" rows="3"></textarea>
+
+    <label for="screenshot">Payment Screenshot</label>
+    <input type="file" id="screenshot" name="screenshot" accept="image/*" required>
+
+    <button type="submit">Submit Deposit</button>
+  </form>
+
+  <div class="message" id="responseMessage"></div>
+
+  <script>
+    const token = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODg4OWQwMGEyZjE2NTVjNWZlNzA3ZmIiLCJpYXQiOjE3NTM5NTA1MzAsImV4cCI6MTc1NDU1NTMzMH0.gswglBzBys2mZkR_Htyd1RlAS8DbOWlDgNMDwNHz4jU";
+
+    document.getElementById('depositForm').addEventListener('submit', async function (e) {
+      e.preventDefault();
+
+      const form = e.target;
+      const formData = new FormData();
+
+      formData.append("amount", form.amount.value);
+      formData.append("utrId", form.utrId.value);
+      formData.append("paymentMethod", form.paymentMethod.value);
+      formData.append("remarks", form.remarks.value);
+      formData.append("paymentScreenshot", form.screenshot.files[0]);
+
+      try {
+        const response = await fetch("https://satashreejibackend.onrender.com/api/user/wallet/manual-deposit", {
+          method: "POST",
+          headers: {
+            Authorization: token
+          },
+          body: formData
+        });
+
+        const data = await response.json();
+
+        const messageEl = document.getElementById("responseMessage");
+        messageEl.classList.remove("success", "error");
+
+        if (response.ok) {
+          messageEl.classList.add("success");
+          messageEl.textContent = data.message;
+          form.reset();
+        } else {
+          messageEl.classList.add("error");
+          messageEl.textContent = data.message || "Something went wrong!";
+        }
+      } catch (err) {
+        console.error("Error:", err);
+        const messageEl = document.getElementById("responseMessage");
+        messageEl.classList.add("error");
+        messageEl.textContent = "Network or server error.";
+      }
+    });
+  </script>
+
+</body>
+</html>

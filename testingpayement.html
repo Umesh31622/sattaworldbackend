@@ -1,0 +1,820 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wallet - Add Money</title>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .wallet-container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .wallet-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .wallet-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 8px;
+        }
+
+        .wallet-balance {
+            font-size: 18px;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .balance-amount {
+            font-size: 36px;
+            font-weight: 800;
+            color: #4CAF50;
+            margin: 15px 0;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 16px;
+            border: 2px solid #e1e5e9;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .amount-buttons {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .amount-btn {
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            color: #333;
+        }
+
+        .amount-btn:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+
+        .amount-btn.active {
+            border-color: #667eea;
+            background: #667eea;
+            color: white;
+        }
+
+        .deposit-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+
+        .deposit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .deposit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #ffffff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            color: #e74c3c;
+            background: #fdf2f2;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            border-left: 4px solid #e74c3c;
+        }
+
+        .success-message {
+            color: #27ae60;
+            background: #f0f9f0;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            border-left: 4px solid #27ae60;
+        }
+
+        .transaction-history {
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 1px solid #e1e5e9;
+        }
+
+        .transaction-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .transaction-details {
+            flex: 1;
+        }
+
+        .transaction-type {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+        }
+
+        .transaction-date {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .transaction-amount {
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .transaction-amount.deposit {
+            color: #4CAF50;
+        }
+
+        .transaction-amount.withdrawal {
+            color: #f44336;
+        }
+
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-completed {
+            background: #e8f5e8;
+            color: #4CAF50;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-failed {
+            background: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <div class="wallet-container">
+        <div class="wallet-header">
+            <h1 class="wallet-title">My Wallet</h1>
+            <div class="wallet-balance">Current Balance</div>
+            <div class="balance-amount">₹<span id="currentBalance">0</span></div>
+        </div>
+
+        <div id="errorMessage" class="error-message" style="display: none;"></div>
+        <div id="successMessage" class="success-message" style="display: none;"></div>
+
+        <form id="depositForm">
+            <div class="form-group">
+                <label class="form-label">Select Amount</label>
+                <div class="amount-buttons">
+                    <button type="button" class="amount-btn" data-amount="100">₹100</button>
+                    <button type="button" class="amount-btn" data-amount="500">₹500</button>
+                    <button type="button" class="amount-btn" data-amount="1000">₹1000</button>
+                    <button type="button" class="amount-btn" data-amount="2000">₹2000</button>
+                    <button type="button" class="amount-btn" data-amount="5000">₹5000</button>
+                    <button type="button" class="amount-btn" data-amount="10000">₹10000</button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="customAmount">Or Enter Custom Amount</label>
+                <input type="number" id="customAmount" class="form-input" placeholder="Enter amount..." min="100">
+            </div>
+
+            <button type="submit" class="deposit-btn" id="depositBtn">
+                <span class="btn-text">Add Money</span>
+            </button>
+        </form>
+
+        <div class="transaction-history">
+            <h3>Recent Transactions</h3>
+            <div id="transactionsList"></div>
+        </div>
+    </div>
+
+    <script>
+        // Mock data - replace with actual API calls
+        let currentUser = null;
+        let walletBalance = 0;
+        let recentTransactions = [];
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', async function() {
+            await loadWalletData();
+            initializeEventListeners();
+        });
+
+        // Load wallet data
+        // Load wallet data
+async function loadWalletData() {
+    try {
+        const response = await fetch('/api/wallet', {
+            headers: {
+                'Authorization': `Bearer ${your_token_here}`
+            }
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            // Check if data.wallet exists before accessing balance
+            if (data && data.wallet) {
+                walletBalance = data.wallet.balance || 0;
+                recentTransactions = data.recentTransactions || [];
+                
+                document.getElementById('currentBalance').textContent = walletBalance;
+                displayTransactions(recentTransactions);
+            } else {
+                console.error('Invalid wallet data structure:', data);
+                showError('Invalid wallet data received');
+            }
+        } else {
+            const errorData = await response.json();
+            showError(errorData.message || 'Failed to load wallet data');
+        }
+    } catch (error) {
+        console.error('Error loading wallet data:', error);
+        showError('Failed to load wallet data');
+    }
+}
+       
+            try {
+                const response = await fetch('/api/wallet', {
+                    headers: {
+                        'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODcyYzhjNjY4MmNiMWNjNzg2ZDc1MzgiLCJpYXQiOjE3NTI0MDU2MTQsImV4cCI6MTc1MzAxMDQxNH0.IgcxZI-2vLdf7wgzVj3So3rcEtKEWLDuNsh8bJstEQM`
+
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    walletBalance = data.wallet.balance;
+                    recentTransactions = data.recentTransactions;
+                    
+                    document.getElementById('currentBalance').textContent = walletBalance;
+                    displayTransactions(recentTransactions);
+                } else {
+                    showError('Failed to load wallet data');
+                }
+            } catch (error) {
+                console.error('Error loading wallet data:', error);
+                showError('Failed to load wallet data');
+            }
+        }
+
+        // Initialize event listeners
+        function initializeEventListeners() {
+            // Amount button clicks
+            document.querySelectorAll('.amount-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.amount-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    document.getElementById('customAmount').value = this.dataset.amount;
+                });
+            });
+
+            // Custom amount input
+            document.getElementById('customAmount').addEventListener('input', function() {
+                document.querySelectorAll('.amount-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+            });
+
+            // Form submission
+            document.getElementById('depositForm').addEventListener('submit', handleDeposit);
+        }
+
+        // Handle deposit
+        async function handleDeposit(e) {
+            e.preventDefault();
+            
+            const amount = parseInt(document.getElementById('customAmount').value);
+            
+            if (!amount || amount < 100) {
+                showError('Please enter a valid amount (minimum ₹100)');
+                return;
+            }
+
+            setLoading(true);
+            hideMessages();
+
+            try {
+                // Create Razorpay order
+                const orderResponse = await fetch('/api/wallet/create-order', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODcyYzhjNjY4MmNiMWNjNzg2ZDc1MzgiLCJpYXQiOjE3NTI0MDU2MTQsImV4cCI6MTc1MzAxMDQxNH0.IgcxZI-2vLdf7wgzVj3So3rcEtKEWLDuNsh8bJstEQM`
+                    },
+                    body: JSON.stringify({ amount })
+                });
+
+                if (!orderResponse.ok) {
+                    const errorData = await orderResponse.json();
+                    throw new Error(errorData.message || 'Failed to create order');
+                }
+
+                const orderData = await orderResponse.json();
+                
+                // Initialize Razorpay
+                const options = {
+                    key: orderData.order.key,
+                    amount: orderData.order.amount,
+                    currency: orderData.order.currency,
+                    order_id: orderData.order.id,
+                    name: 'Your App Name',
+                    description: 'Wallet Deposit',
+                    image: '/logo.png', // Your logo URL
+                    handler: function(response) {
+                        verifyPayment(response, orderData.transactionId);
+                    },
+                    prefill: {
+                        name: currentUser?.username || '',
+                        email: currentUser?.email || '',
+                        contact: currentUser?.mobile || ''
+                    },
+                    theme: {
+                        color: '#667eea'
+                    },
+                    modal: {
+                        ondismiss: function() {
+                            handlePaymentFailure(orderData.transactionId, 'Payment cancelled by user');
+                        }
+                    }
+                };
+
+                const rzp = new Razorpay(options);
+                rzp.open();
+                
+            } catch (error) {
+                console.error('Error creating order:', error);
+                showError(error.message || 'Failed to initiate payment');
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        // Verify payment
+        async function verifyPayment(response, transactionId) {
+            try {
+                const verifyResponse = await fetch('/api/wallet/verify-payment', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODcyYzhjNjY4MmNiMWNjNzg2ZDc1MzgiLCJpYXQiOjE3NTI0MDU2MTQsImV4cCI6MTc1MzAxMDQxNH0.IgcxZI-2vLdf7wgzVj3So3rcEtKEWLDuNsh8bJstEQM`
+
+                    },
+                    body: JSON.stringify({
+                        razorpay_order_id: response.razorpay_order_id,
+                        razorpay_payment_id: response.razorpay_payment_id,
+                        razorpay_signature: response.razorpay_signature,
+                        transactionId: transactionId
+                    })
+                });
+
+                if (verifyResponse.ok) {
+                    const data = await verifyResponse.json();
+                    showSuccess('Payment successful! Wallet updated.');
+                    
+                    // Update balance
+                    walletBalance = data.wallet.balance;
+                    document.getElementById('currentBalance').textContent = walletBalance;
+                    
+                    // Reset form
+                    document.getElementById('depositForm').reset();
+                    document.querySelectorAll('.amount-btn').forEach(btn => btn.classList.remove('active'));
+                    
+                    // Reload transactions
+                    await loadWalletData();
+                } else {
+                    const errorData = await verifyResponse.json();
+                    throw new Error(errorData.message || 'Payment verification failed');
+                }
+            } catch (error) {
+                console.error('Error verifying payment:', error);
+                showError(error.message || 'Payment verification failed');
+            }
+        }
+
+        // Handle payment failure
+        async function handlePaymentFailure(transactionId, error) {
+            try {
+                await fetch('/api/wallet/payment-failed', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODcyYzhjNjY4MmNiMWNjNzg2ZDc1MzgiLCJpYXQiOjE3NTI0MDU2MTQsImV4cCI6MTc1MzAxMDQxNH0.IgcxZI-2vLdf7wgzVj3So3rcEtKEWLDuNsh8bJstEQM`
+
+                    },
+                    body: JSON.stringify({
+                        transactionId: transactionId,
+                        error: error
+                    })
+                });
+            } catch (err) {
+                console.error('Error recording payment failure:', err);
+            }
+        }
+
+        // Display transactions
+        function displayTransactions(transactions) {
+            const transactionsList = document.getElementById('transactionsList');
+            
+            if (transactions.length === 0) {
+                transactionsList.innerHTML = '<p style="text-align: center; color: #666; padding: 20px;">No transactions yet</p>';
+                return;
+            }
+
+            transactionsList.innerHTML = transactions.map(transaction => {
+                const date = new Date(transaction.createdAt).toLocaleDateString();
+                const amountClass = transaction.type === 'deposit' ? 'deposit' : 'withdrawal';
+                const amountPrefix = transaction.type === 'deposit' ? '+' : '-';
+                
+                return `
+                    <div class="transaction-item">
+                        <div class="transaction-details">
+                            <div class="transaction-type">${transaction.description}</div>
+                            <div class="transaction-date">${date}</div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div class="transaction-amount ${amountClass}">
+                                ${amountPrefix}₹${transaction.amount}
+                            </div>
+                            <div class="status-badge status-${transaction.status}">
+                                ${transaction.status}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Utility functions
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            setTimeout(() => {
+                errorDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        function showSuccess(message) {
+            const successDiv = document.getElementById('successMessage');
+            successDiv.textContent = message;
+            successDiv.style.display = 'block';
+            setTimeout(() => {
+                successDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        function hideMessages() {
+            document.getElementById('errorMessage').style.display = 'none';
+            document.getElementById('successMessage').style.display = 'none';
+        }
+
+        function setLoading(isLoading) {
+            const btn = document.getElementById('depositBtn');
+            const btnText = btn.querySelector('.btn-text');
+            
+            if (isLoading) {
+                btn.disabled = true;
+                btnText.innerHTML = '<span class="loading"></span>Processing...';
+            } else {
+                btn.disabled = false;
+                btnText.innerHTML = 'Add Money';
+            }
+        }
+    </script>
+</body>
+</html> -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Wallet - API Integration</title>
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f3f4f6;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 600px;
+      margin: 30px auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    h1, h2 {
+      color: #333;
+    }
+    .btn {
+      background: #667eea;
+      color: #fff;
+      padding: 10px 20px;
+      border: none;
+      margin: 10px 0;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .btn:hover {
+      background: #556cd6;
+    }
+    .input {
+      width: 100%;
+      padding: 8px;
+      margin: 8px 0;
+      border-radius: 5px;
+      border: 1px solid #ddd;
+    }
+    .message {
+      margin: 10px 0;
+      padding: 10px;
+      border-radius: 5px;
+    }
+    .success {
+      background: #d4edda;
+      color: #155724;
+    }
+    .error {
+      background: #f8d7da;
+      color: #721c24;
+    }
+    .transaction {
+      border-bottom: 1px solid #eee;
+      padding: 10px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Wallet Dashboard</h1>
+    <div>
+      <strong>Current Balance: ₹<span id="walletBalance">0</span></strong>
+    </div>
+    <div id="message" class="message" style="display: none;"></div>
+
+    <h2>Add Money</h2>
+    <input type="number" id="depositAmount" class="input" placeholder="Enter amount (min ₹100)" />
+    <button class="btn" onclick="createOrder()">Deposit via Razorpay</button>
+    <button class="btn" onclick="oldDeposit()">Old Deposit Method</button>
+
+    <h2>Recent Transactions</h2>
+    <div id="transactions"></div>
+
+    <h2>Admin - Pending Deposits</h2>
+    <button class="btn" onclick="loadPendingDeposits()">Load Pending Deposits</button>
+    <div id="pendingDeposits"></div>
+  </div>
+
+  <script>
+    const API_BASE = '/api/wallet';
+    const AUTH_TOKEN = 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODcyYzhjNjY4MmNiMWNjNzg2ZDc1MzgiLCJpYXQiOjE3NTMwNDM4NjEsImV4cCI6MTc1MzY0ODY2MX0.2ruSypXVD53yNACOg87n17yMPFLAp3o-om3DXPTVB34'; // Replace with actual token
+
+    async function showMessage(type, text) {
+      const messageDiv = document.getElementById('message');
+      messageDiv.className = 'message ' + (type === 'success' ? 'success' : 'error');
+      messageDiv.textContent = text;
+      messageDiv.style.display = 'block';
+      setTimeout(() => messageDiv.style.display = 'none', 4000);
+    }
+
+    async function loadWallet() {
+      try {
+        const res = await fetch(API_BASE, {
+          headers: { 'Authorization': AUTH_TOKEN }
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message);
+
+        document.getElementById('walletBalance').textContent = data.wallet.balance;
+        displayTransactions(data.recentTransactions);
+      } catch (err) {
+        console.error(err);
+        showMessage('error', err.message);
+      }
+    }
+
+    function displayTransactions(transactions) {
+      const container = document.getElementById('transactions');
+      container.innerHTML = transactions.map(txn => `
+        <div class="transaction">
+          <div><strong>${txn.description}</strong></div>
+          <div>Amount: ₹${txn.amount} | Status: ${txn.status}</div>
+          <div>Date: ${new Date(txn.createdAt).toLocaleString()}</div>
+        </div>
+      `).join('') || '<p>No transactions found.</p>';
+    }
+
+    async function createOrder() {
+      const amount = document.getElementById('depositAmount').value;
+      if (!amount || amount < 100) return showMessage('error', 'Minimum amount is ₹100');
+
+      try {
+        const res = await fetch(API_BASE + '/create-order', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': AUTH_TOKEN
+          },
+          body: JSON.stringify({ amount: parseInt(amount) })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message);
+
+        launchRazorpay(data.order, data.transactionId);
+      } catch (err) {
+        console.error(err);
+        showMessage('error', err.message);
+      }
+    }
+
+    function launchRazorpay(order, transactionId) {
+      const options = {
+        key: order.key,
+        amount: order.amount,
+        currency: order.currency,
+        order_id: order.id,
+        name: 'Wallet Recharge',
+        handler: async function(response) {
+          await verifyPayment(response, transactionId);
+        }
+      };
+      const rzp = new Razorpay(options);
+      rzp.open();
+    }
+
+    async function verifyPayment(payment, transactionId) {
+      try {
+        const res = await fetch(API_BASE + '/verify-payment', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': AUTH_TOKEN
+          },
+          body: JSON.stringify({
+            razorpay_order_id: payment.razorpay_order_id,
+            razorpay_payment_id: payment.razorpay_payment_id,
+            razorpay_signature: payment.razorpay_signature,
+            transactionId
+          })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message);
+
+        showMessage('success', 'Payment successful! Awaiting admin approval.');
+        await loadWallet();
+      } catch (err) {
+        console.error(err);
+        showMessage('error', 'Payment verification failed: ' + err.message);
+      }
+    }
+
+    async function oldDeposit() {
+      const amount = document.getElementById('depositAmount').value;
+      if (!amount || amount < 100) return showMessage('error', 'Minimum amount is ₹100');
+
+      try {
+        const res = await fetch(API_BASE + '/deposit', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': AUTH_TOKEN
+          },
+          body: JSON.stringify({
+            amount: parseInt(amount),
+            paymentMethod: 'manual',
+            mobileNumber: '9876543210',
+            transactionId: 'TXN' + Date.now()
+          })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message);
+
+        showMessage('success', 'Deposit request submitted for admin approval.');
+        await loadWallet();
+      } catch (err) {
+        console.error(err);
+        showMessage('error', err.message);
+      }
+    }
+
+    async function loadPendingDeposits() {
+      try {
+        const res = await fetch(API_BASE + '/admin/pending-deposits', {
+          headers: { 'Authorization': AUTH_TOKEN }
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message);
+
+        const container = document.getElementById('pendingDeposits');
+        container.innerHTML = data.deposits.map(dep => `
+          <div class="transaction">
+            <div><strong>${dep.user.username}</strong> (₹${dep.amount})</div>
+            <div>Status: ${dep.status}</div>
+            <div>Date: ${new Date(dep.createdAt).toLocaleString()}</div>
+          </div>
+        `).join('') || '<p>No pending deposits.</p>';
+      } catch (err) {
+        console.error(err);
+        showMessage('error', err.message);
+      }
+    }
+
+    window.onload = loadWallet;
+  </script>
+</body>
+</html>
