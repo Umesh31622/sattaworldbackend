@@ -108,7 +108,7 @@
       formData.append("paymentScreenshot", form.screenshot.files[0]);
 
       try {
-        const response = await fetch("https://satashreejibackend.onrender.com/api/user/wallet/manual-deposit", {
+        const response = await fetch("https://sattaworldbackend.onrender.com/api/user/wallet/manual-deposit", {
           method: "POST",
           headers: {
             Authorization: token
